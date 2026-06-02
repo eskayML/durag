@@ -1,6 +1,11 @@
-# Du-RAG
+<p align="center">
+  <img src="assets/durag-banner.jpg" alt="Du-RAG" width="600">
+</p>
 
-**Durable RAG** — a persistent memory layer for AI agents built on retrieval-augmented generation.
+<h1 align="center">Du-RAG</h1>
+<p align="center"><b>Durable RAG</b> — a persistent memory layer for AI agents built on retrieval-augmented generation.</p>
+
+---
 
 ```bash
 pip install durag
