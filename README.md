@@ -12,37 +12,37 @@
   <a href="https://github.com/eskayML/durag/stargazers">
     <img src="https://img.shields.io/github/stars/eskayML/durag?style=flat" alt="Stars">
   </a>
-  <a href="https://github.com/eskayML/durag/commits/main">
-    <img src="https://img.shields.io/github/last-commit/eskayML/durag?color=blueviolet" alt="Last Commit">
-  </a>
   <a href="https://github.com/eskayML/durag">
     <img src="https://img.shields.io/github/repo-size/eskayML/durag?color=orange" alt="Repo Size">
-  </a>
-  <a href="https://pypi.org/project/durag/">
-    <img src="https://img.shields.io/pypi/pyversions/durag?color=green" alt="Python Versions">
   </a>
 </p>
 
 ---
 
 ```bash
-pip install durag
+pip install durag[local]
 ```
 
 ```python
 from durag import Memory
 
 m = Memory()
-m.add("User likes Python", user_id="alice")
-results = m.search("What does Alice prefer?", user_id="alice")
+
+m.add("Alice loves Python and open source", user_id="alice")
+m.add("Alice built Du-RAG", user_id="alice")
+
+history = m.get_all(filters={"user_id": "alice"})
+print(history)
 ```
+
+No API keys. No cloud. Runs entirely on your machine.
 
 ## Features
 
-- Persistent memory across conversations
-- Semantic search via vector embeddings
-- Supports Qdrant, Chroma, Pinecone, Weaviate and more
-- Fully self-hosted, no cloud dependencies
+- Persistent memory across conversations — agents remember what they learn
+- Semantic search via vector embeddings — find the right context fast
+- Fully local — HuggingFace embeddings + FAISS by default, no data leaves your machine
+- Multiple backends — swap in OpenAI, Qdrant, Chroma, Pinecone, Weaviate when you need them
 
 ## License
 
