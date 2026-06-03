@@ -40,31 +40,62 @@ class LLMBase(ABC):
             # This will be handled by individual providers
             pass
 
-    def _is_reasoning_model(self, model: str) -> bool:
+    @staticmethod
+    def _uses_max_completion_tokens(model: str) -> bool:
         """
-        Check if the model is a reasoning model or GPT-5 series that doesn't support certain parameters.
+        Check if the model requires max_completion_tokens instead of max_tokens.
+        
+        This applies to:
+        - o1, o3 series (o1, o1-preview, o1-2024-12-17, o3-mini, etc.)
+        - gpt-5 series (gpt-5, gpt-5-mini, gpt-5o, gpt-5o-mini, gpt-5o-micro, gpt-5.x, etc.)
         
         Args:
             model: The model name to check
             
         Returns:
-            bool: True if the model is a reasoning model or GPT-5 series
+            bool: True if the model uses max_completion_tokens
         """
-        reasoning_models = {
-            "o1", "o1-preview", "o3-mini", "o3",
-            "gpt-5", "gpt-5o", "gpt-5o-mini", "gpt-5o-micro",
-        }
-
         model_lower = model.lower()
-        # Strip provider prefixes (e.g. "openai/o3-mini" -> "o3-mini")
         base_model = model_lower.rsplit("/", 1)[-1]
 
-        if base_model in reasoning_models:
+        # Exact match on known models
+        max_completion_models = {
+            "o1", "o1-preview", "o3-mini", "o3",
+            "gpt-5", "gpt-5-mini", "gpt-5o", "gpt-5o-mini", "gpt-5o-micro",
+        }
+        if base_model in max_completion_models:
+            return True
+
+        # Prefix match: o1/o3 family (o1-*, o3-*) and gpt-5 variants (gpt-5.*, gpt-5-*)
+        if any(base_model.startswith(p) for p in ["o1-", "o1.", "o3-", "o3.", "gpt-5"]):
+            return True
+
+        return False
+
+    def _is_strict_reasoning_model(self, model: str) -> bool:
+        """
+        Check if the model is a strict reasoning model (o1/o3 series) that
+        doesn't support temperature, top_p, or max_tokens.
+        
+        These models only support: messages, response_format, tools, tool_choice,
+        reasoning_effort, and max_completion_tokens.
+        
+        Args:
+            model: The model name to check
+            
+        Returns:
+            bool: True if the model is a strict reasoning model
+        """
+        model_lower = model.lower()
+        base_model = model_lower.rsplit("/", 1)[-1]
+
+        strict_models = {"o1", "o1-preview", "o3-mini", "o3"}
+        if base_model in strict_models:
             return True
 
         # Match o1/o3 family with prefixes (o1-2024-12-17, o3-2025-04-16)
-        # but NOT gpt-5.x variants (gpt-5.4-mini supports temperature)
-        if any(base_model.startswith(prefix) for prefix in ["o1-", "o1.", "o3-", "o3."]):
+        # but NOT gpt-5 variants (which support temperature and top_p)
+        if any(base_model.startswith(p) for p in ["o1-", "o1.", "o3-", "o3."]):
             return True
 
         return False
@@ -72,7 +103,7 @@ class LLMBase(ABC):
     def _get_supported_params(self, **kwargs) -> Dict:
         """
         Get parameters that are supported by the current model.
-        Filters out unsupported parameters for reasoning models and GPT-5 series.
+        Handles differences between reasoning models, GPT-5 series, and regular models.
         
         Args:
             **kwargs: Additional parameters to include
@@ -82,7 +113,8 @@ class LLMBase(ABC):
         """
         model = getattr(self.config, 'model', '')
         
-        if self._is_reasoning_model(model):
+        if self._is_strict_reasoning_model(model):
+            # o1/o3 series: strip temperature, top_p, max_tokens
             supported_params = {}
             
             if "messages" in kwargs:
@@ -99,9 +131,13 @@ class LLMBase(ABC):
             if reasoning_effort:
                 supported_params["reasoning_effort"] = reasoning_effort
 
+            # Add max_completion_tokens for reasoning models that need it
+            if self.config.max_tokens is not None:
+                supported_params["max_completion_tokens"] = self.config.max_tokens
+
             return supported_params
         else:
-            # For regular models, include all common parameters
+            # For regular models (including GPT-5 series), include all common params
             return self._get_common_params(**kwargs)
 
     @abstractmethod
@@ -125,13 +161,17 @@ class LLMBase(ABC):
     def _get_common_params(self, **kwargs) -> Dict:
         """
         Get common parameters that most providers use.
+        Uses max_completion_tokens for models that require it (GPT-5, o1/o3 series).
 
         Returns:
             Dict: Common parameters dictionary.
         """
+        model = getattr(self.config, 'model', '')
+        token_key = "max_completion_tokens" if self._uses_max_completion_tokens(model) else "max_tokens"
+        
         params = {
             "temperature": self.config.temperature,
-            "max_tokens": self.config.max_tokens,
+            token_key: self.config.max_tokens,
             "top_p": self.config.top_p,
         }
 
