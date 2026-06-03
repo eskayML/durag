@@ -6,7 +6,10 @@ import random
 import sys
 import threading
 
-from posthog import Posthog
+try:
+    from posthog import Posthog
+except ImportError:
+    Posthog = None  # Telemetry silently disabled
 
 import durag
 from durag.memory.setup import get_or_create_user_id
@@ -72,7 +75,7 @@ def _sampling_before_send(msg):
 
 class AnonymousTelemetry:
     def __init__(self, vector_store=None, before_send=None):
-        if not DURAG_TELEMETRY:
+        if not DURAG_TELEMETRY or Posthog is None:
             self.posthog = None
             self.user_id = None
             return
