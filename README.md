@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/durag-banner.jpg" alt="Du-RAG" width="600">
+  <img src="https://raw.githubusercontent.com/eskayML/durag/main/assets/durag-banner.jpg" alt="Du-RAG" width="600">
 </p>
 
 <h1 align="center">Du-RAG</h1>
@@ -20,7 +20,7 @@
 ---
 
 ```bash
-pip install durag[local]
+pip install durag
 ```
 
 ```python
@@ -35,14 +35,32 @@ history = m.get_all(filters={"user_id": "alice"})
 print(history)
 ```
 
-No API keys. No cloud. Runs entirely on your machine.
+## API Keys
+
+Du-RAG requires a provider API key. Set the env var for your preferred provider before first use:
+
+| Provider | Env Var | Used For |
+|----------|---------|----------|
+| OpenAI (default) | `OPENAI_API_KEY` | Embeddings + LLM |
+| Anthropic | `ANTHROPIC_API_KEY` | LLM |
+| Google Gemini | `GOOGLE_API_KEY` | Embeddings + LLM |
+| DeepSeek | `DEEPSEEK_API_KEY` | LLM |
+| Together AI | `TOGETHER_API_KEY` | Embeddings + LLM |
+| Groq | `GROQ_API_KEY` | LLM |
+| MiniMax | `MINIMAX_API_KEY` | LLM |
+| Sarvam AI | `SARVAM_API_KEY` | LLM |
+| vLLM | `VLLM_API_KEY` | LLM |
+
+```bash
+export OPENAI_API_KEY="sk-..."
+```
 
 ## Features
 
 - Persistent memory across conversations — agents remember what they learn
 - Semantic search via vector embeddings — find the right context fast
-- Fully local — HuggingFace embeddings + FAISS by default, no data leaves your machine
-- Multiple backends — swap in OpenAI, Qdrant, Chroma, Pinecone, Weaviate when you need them
+- Multiple backends — OpenAI, Anthropic, Gemini, DeepSeek, Ollama, vLLM, and more
+- Vector stores — Qdrant (default), Chroma, FAISS, Pinecone, Weaviate, and others
 
 ## License
 
