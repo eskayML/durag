@@ -554,3 +554,9 @@ class Qdrant(VectorStoreBase):
         logger.warning(f"Resetting index {self.collection_name}...")
         self.delete_col()
         self.create_col(self.embedding_model_dims, self.on_disk)
+
+    def close(self):
+        """Close the Qdrant client, releasing file locks (local mode)."""
+        if hasattr(self, 'client') and self.client is not None:
+            self.client.close()
+            self.client = None

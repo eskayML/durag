@@ -1783,10 +1783,28 @@ class Memory(MemoryBase):
         capture_event("durag.reset", self, {"sync_type": "sync"})
 
     def close(self):
-        """Release resources held by this Memory instance (SQLite connections, etc.)."""
+        """Release resources held by this Memory instance (Qdrant locks, SQLite, etc.)."""
+        # Close vector store (releases Qdrant file lock in local mode)
+        if hasattr(self, "vector_store") and self.vector_store is not None:
+            self.vector_store.close()
+            self.vector_store = None
+        # Close telemetry vector store (separate Qdrant path)
+        if hasattr(self, "_telemetry_vector_store") and self._telemetry_vector_store is not None:
+            self._telemetry_vector_store.close()
+            self._telemetry_vector_store = None
+        # Close SQLite
         if hasattr(self, "db") and self.db is not None:
             self.db.close()
             self.db = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    def __del__(self):
+        self.close()
 
     def chat(self, query):
         raise NotImplementedError("Chat function not implemented yet.")

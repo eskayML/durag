@@ -57,6 +57,13 @@ class VectorStoreBase(ABC):
         """Reset by delete the collection and recreate it."""
         pass
 
+    def close(self):
+        """Release resources held by this vector store (connections, file locks, etc.).
+        
+        Override in subclasses that hold persistent connections (e.g. Qdrant local mode).
+        """
+        pass
+
     def keyword_search(self, query: str, top_k: int = 5, filters: dict = None):
         """Keyword/BM25 full-text search. Returns None if not supported by this store.
 
