@@ -15,6 +15,9 @@
   <a href="https://github.com/eskayML/durag">
     <img src="https://img.shields.io/github/repo-size/eskayML/durag?color=orange" alt="Repo Size">
   </a>
+  <a href="https://durag.readthedocs.io">
+    <img src="https://img.shields.io/readthedocs/durag?label=docs" alt="Docs">
+  </a>
 </p>
 
 ---
