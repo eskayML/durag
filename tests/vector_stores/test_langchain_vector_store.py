@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("langchain")
 from langchain_community.vectorstores import VectorStore
 
 from durag.vector_stores.langchain import Langchain

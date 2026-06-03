@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("google.genai")
 from google.genai import types
 
 from durag.configs.llms.base import BaseLlmConfig

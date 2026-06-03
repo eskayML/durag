@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("google.cloud.aiplatform")
 
 from durag.embeddings.vertexai import VertexAIEmbedding
 

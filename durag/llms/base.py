@@ -162,7 +162,8 @@ class LLMBase(ABC):
         """
         Get common parameters that most providers use.
         Uses max_completion_tokens for models that require it (GPT-5, o1/o3 series).
-        Omits temperature/top_p for gpt-5 series models (they only accept the default 1.0).
+        Temperature and top_p are always passed (strict reasoning models like o1/o3
+        are handled by _get_supported_params which returns early).
 
         Returns:
             Dict: Common parameters dictionary.
@@ -174,12 +175,8 @@ class LLMBase(ABC):
         
         params = {}
         
-        # gpt-5 series only supports temperature=1.0 and top_p=1.0 (omitting them = default)
-        # o1/o3 series strips these entirely via _get_supported_params
-        # All other models send them as configured
-        if not uses_max_completion:
-            params["temperature"] = self.config.temperature
-            params["top_p"] = self.config.top_p
+        params["temperature"] = self.config.temperature
+        params["top_p"] = self.config.top_p
         
         params[token_key] = self.config.max_tokens
 

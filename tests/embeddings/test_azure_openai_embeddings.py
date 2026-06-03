@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("azure.identity")
 
 from durag.configs.embeddings.base import BaseEmbedderConfig
 from durag.embeddings.azure_openai import AzureOpenAIEmbedding

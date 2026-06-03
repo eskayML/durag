@@ -1,6 +1,7 @@
 from unittest.mock import ANY, patch
 
 import pytest
+pytest.importorskip("google.genai")
 
 from durag.configs.embeddings.base import BaseEmbedderConfig
 from durag.embeddings.gemini import GoogleGenAIEmbedding

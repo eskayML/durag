@@ -1,6 +1,7 @@
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
+pytest.importorskip("pymochow")
 from pymochow.exception import ServerError
 from pymochow.model.enum import ServerErrCode, TableState
 from pymochow.model.table import (

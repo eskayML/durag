@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 from unittest.mock import MagicMock, call, patch
 
 import pytest
+pytest.importorskip("upstash_vector")
 
 from durag.vector_stores.upstash_vector import UpstashVector
 

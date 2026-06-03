@@ -3,6 +3,8 @@ import unittest
 from unittest.mock import MagicMock, Mock, patch
 
 import dotenv
+import pytest
+pytest.importorskip("elasticsearch")
 
 try:
     from elasticsearch import Elasticsearch

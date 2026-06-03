@@ -4,6 +4,8 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import dotenv
+import pytest
+pytest.importorskip("opensearchpy")
 
 try:
     from opensearchpy import AWSV4SignerAuth, OpenSearch

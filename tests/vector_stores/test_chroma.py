@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("chromadb")
 
 from durag.configs.vector_stores.chroma import ChromaDbConfig
 from durag.vector_stores.chroma import ChromaDB

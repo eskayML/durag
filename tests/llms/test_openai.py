@@ -308,24 +308,23 @@ def test_gpt5_mini_not_classified_as_reasoning(mock_openai_client):
 
 
 def test_is_reasoning_model_classification(mock_openai_client):
-    """Test _is_reasoning_model correctly classifies known models."""
+    """Test _is_strict_reasoning_model correctly classifies known models."""
     config = OpenAIConfig(model="gpt-4.1")
     llm = OpenAILLM(config)
 
-    # Reasoning models — should return True
-    assert llm._is_reasoning_model("o1") is True
-    assert llm._is_reasoning_model("o3-mini") is True
-    assert llm._is_reasoning_model("o3") is True
-    assert llm._is_reasoning_model("gpt-5") is True
-    assert llm._is_reasoning_model("o1-preview") is True
-    assert llm._is_reasoning_model("o1-2024-12-17") is True
-    assert llm._is_reasoning_model("openai/o3-mini") is True
+    # Strict reasoning models (o1/o3) — should return True
+    assert llm._is_strict_reasoning_model("o1") is True
+    assert llm._is_strict_reasoning_model("o3-mini") is True
+    assert llm._is_strict_reasoning_model("o3") is True
+    assert llm._is_strict_reasoning_model("o1-preview") is True
+    assert llm._is_strict_reasoning_model("o1-2024-12-17") is True
 
-    # Non-reasoning models — should return False
-    assert llm._is_reasoning_model("gpt-5.4-mini") is False
-    assert llm._is_reasoning_model("gpt-5.4") is False
-    assert llm._is_reasoning_model("gpt-4.1") is False
-    assert llm._is_reasoning_model("gpt-4.1-nano-2025-04-14") is False
+    # Non-strict models — gpt-5 and gpt-5.4-mini are NOT strict reasoning
+    assert llm._is_strict_reasoning_model("gpt-5") is False
+    assert llm._is_strict_reasoning_model("gpt-5.4-mini") is False
+    assert llm._is_strict_reasoning_model("gpt-5.4") is False
+    assert llm._is_strict_reasoning_model("gpt-4.1") is False
+    assert llm._is_strict_reasoning_model("gpt-4.1-nano-2025-04-14") is False
 
 
 def test_callback_with_tools(mock_openai_client):

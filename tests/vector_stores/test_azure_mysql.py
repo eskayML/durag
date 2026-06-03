@@ -2,6 +2,7 @@ import json
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("pymysql")
 
 from durag.vector_stores.azure_mysql import AzureMySQL, OutputData
 

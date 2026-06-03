@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("supabase")
 
 from durag.configs.vector_stores.supabase import IndexMeasure, IndexMethod
 from durag.vector_stores.supabase import Supabase

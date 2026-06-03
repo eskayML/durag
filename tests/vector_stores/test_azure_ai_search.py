@@ -2,6 +2,7 @@ import json
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+pytest.importorskip("azure.search.documents")
 from azure.core.exceptions import HttpResponseError
 
 from durag.configs.vector_stores.azure_ai_search import AzureAISearchConfig

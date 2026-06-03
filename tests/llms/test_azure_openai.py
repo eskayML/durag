@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("azure.identity")
 
 from durag.configs.llms.azure import AzureOpenAIConfig
 from durag.llms.azure_openai import AzureOpenAILLM

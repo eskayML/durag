@@ -4,6 +4,9 @@ import unittest
 import uuid
 from unittest.mock import MagicMock, patch
 
+import pytest
+pytest.importorskip("psycopg2")
+
 from durag.vector_stores.pgvector import PGVector, _build_filter_conditions
 
 

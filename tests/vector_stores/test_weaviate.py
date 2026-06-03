@@ -5,6 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import dotenv
 import httpx
+import pytest
+pytest.importorskip("weaviate")
 import weaviate
 from weaviate.exceptions import UnexpectedStatusCodeException
 

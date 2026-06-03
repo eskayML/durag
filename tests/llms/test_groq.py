@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("groq")
 
 from durag.configs.llms.base import BaseLlmConfig
 from durag.llms.groq import GroqLLM

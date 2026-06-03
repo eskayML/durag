@@ -2,6 +2,7 @@ import json
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("cassandra")
 
 from durag.vector_stores.cassandra import CassandraDB, OutputData
 

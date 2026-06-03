@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+pytest.importorskip("pinecone")
 
 from durag.vector_stores.pinecone import PineconeDB
 

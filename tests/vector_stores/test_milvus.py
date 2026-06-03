@@ -8,6 +8,8 @@ These tests verify:
 4. Update/upsert operations
 """
 
+import pytest
+pytest.importorskip("pymilvus")
 from unittest.mock import MagicMock, patch
 
 import pytest

@@ -1,6 +1,9 @@
 from unittest import mock
 from unittest.mock import Mock
 
+import pytest
+pytest.importorskip("azure.identity")
+
 from durag.llms.azure_openai_structured import SCOPE, AzureOpenAIStructuredLLM
 
 

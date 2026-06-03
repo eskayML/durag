@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+pytest.importorskip("valkey")
 import pytz
 from valkey.exceptions import ResponseError
 

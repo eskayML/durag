@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("together")
 
 from durag.configs.llms.base import BaseLlmConfig
 from durag.llms.together import TogetherLLM

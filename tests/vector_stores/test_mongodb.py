@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+pytest.importorskip("pymongo")
 
 from durag.vector_stores.mongodb import MongoDB
 

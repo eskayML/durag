@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("google.cloud.aiplatform")
 from google.api_core import exceptions
 from google.cloud.aiplatform.matching_engine.matching_engine_index_endpoint import (
     Namespace,

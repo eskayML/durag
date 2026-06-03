@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+pytest.importorskip("durag.client")
 
 from durag import Memory, MemoryClient
 from durag.proxy.main import Chat, Completions, Durag
