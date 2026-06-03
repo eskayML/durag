@@ -12,6 +12,8 @@ try:
 except ImportError:
     raise ImportError("OpenSearch requires extra dependencies. Install with `pip install opensearch-py`") from None
 
+pytest.importorskip("dotenv")
+
 from durag import Memory
 from durag.configs.base import MemoryConfig
 from durag.vector_stores.opensearch import OpenSearchDB

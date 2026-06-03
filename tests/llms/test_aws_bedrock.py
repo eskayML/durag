@@ -2,6 +2,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytest.importorskip("boto3")
+
 from durag.configs.llms.aws_bedrock import AWSBedrockConfig
 from durag.llms.aws_bedrock import AWSBedrockLLM, extract_provider
 from durag.utils.factory import LlmFactory

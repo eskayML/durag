@@ -11,6 +11,8 @@ try:
 except ImportError:
     raise ImportError("Elasticsearch requires extra dependencies. Install with `pip install elasticsearch`") from None
 
+pytest.importorskip("dotenv")
+
 from durag.configs.vector_stores.elasticsearch import ElasticsearchConfig
 from durag.vector_stores.elasticsearch import ElasticsearchDB, OutputData
 

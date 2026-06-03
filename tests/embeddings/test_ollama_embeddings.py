@@ -2,6 +2,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+pytest.importorskip("ollama")
+
 from durag.configs.embeddings.base import BaseEmbedderConfig
 from durag.embeddings.ollama import OllamaEmbedding
 

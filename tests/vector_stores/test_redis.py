@@ -11,11 +11,13 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytz
+import pytest
 
 
 def _make_redis_db():
     """Create a RedisDB instance with mocked internals, bypassing __init__
     to avoid the redis module name collision with durag.vector_stores.redis."""
+    pytest.importorskip("pytz")
     from durag.vector_stores.redis import RedisDB
 
     db = RedisDB.__new__(RedisDB)

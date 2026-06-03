@@ -3,6 +3,8 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pytest
 
+pytest.importorskip("sentence_transformers")
+
 from durag.configs.embeddings.base import BaseEmbedderConfig
 from durag.embeddings.huggingface import HuggingFaceEmbedding
 

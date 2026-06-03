@@ -10,6 +10,8 @@ pytest.importorskip("weaviate")
 import weaviate
 from weaviate.exceptions import UnexpectedStatusCodeException
 
+pytest.importorskip("dotenv")
+
 from durag.vector_stores.weaviate import Weaviate
 
 

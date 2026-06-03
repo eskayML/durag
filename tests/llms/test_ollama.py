@@ -2,6 +2,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+pytest.importorskip("ollama")
+
 from durag.configs.llms.ollama import OllamaConfig
 from durag.llms.ollama import OllamaLLM
 

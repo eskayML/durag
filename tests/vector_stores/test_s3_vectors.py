@@ -1,4 +1,5 @@
 import pytest
+pytest.importorskip("botocore")
 from botocore.exceptions import ClientError
 
 from durag.configs.vector_stores.s3_vectors import S3VectorsConfig

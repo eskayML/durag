@@ -5,6 +5,8 @@ import sys
 import pytest
 from dotenv import load_dotenv
 
+pytest.importorskip("dotenv")
+
 from durag.utils.factory import VectorStoreFactory
 
 load_dotenv()
