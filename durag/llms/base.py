@@ -162,18 +162,26 @@ class LLMBase(ABC):
         """
         Get common parameters that most providers use.
         Uses max_completion_tokens for models that require it (GPT-5, o1/o3 series).
+        Omits temperature/top_p for gpt-5 series models (they only accept the default 1.0).
 
         Returns:
             Dict: Common parameters dictionary.
         """
         model = getattr(self.config, 'model', '')
-        token_key = "max_completion_tokens" if self._uses_max_completion_tokens(model) else "max_tokens"
+        uses_max_completion = self._uses_max_completion_tokens(model)
         
-        params = {
-            "temperature": self.config.temperature,
-            token_key: self.config.max_tokens,
-            "top_p": self.config.top_p,
-        }
+        token_key = "max_completion_tokens" if uses_max_completion else "max_tokens"
+        
+        params = {}
+        
+        # gpt-5 series only supports temperature=1.0 and top_p=1.0 (omitting them = default)
+        # o1/o3 series strips these entirely via _get_supported_params
+        # All other models send them as configured
+        if not uses_max_completion:
+            params["temperature"] = self.config.temperature
+            params["top_p"] = self.config.top_p
+        
+        params[token_key] = self.config.max_tokens
 
         # Add provider-specific parameters from kwargs
         params.update(kwargs)
