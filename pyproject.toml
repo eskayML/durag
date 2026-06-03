@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "durag"
-version = "2.0.9"
+version = "2.1.0"
 description = "Du-RAG: Durable RAG — persistent memory for AI agents"
 authors = [
     { name = "Samuel Kalu", email = "kalusam619@gmail.com" }
@@ -17,12 +17,12 @@ dependencies = [
     "pydantic>=2.7.3",
     "openai>=1.90.0",
     "posthog>=3.0.0",
+    "faiss-cpu>=1.7.4",
     "qdrant-client>=1.9.0",
 ]
 
 [project.optional-dependencies]
 local = [
-    "faiss-cpu>=1.7.4",
     "sentence-transformers>=3.0.0",
 ]
 
