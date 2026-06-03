@@ -60,7 +60,7 @@ export OPENAI_API_KEY="sk-..."
 - Persistent memory across conversations — agents remember what they learn
 - Semantic search via vector embeddings — find the right context fast
 - Multiple backends — OpenAI, Anthropic, Gemini, DeepSeek, Ollama, vLLM, and more
-- Vector stores — FAISS (default), Qdrant, Chroma, Pinecone, Weaviate, and others
+- Vector stores — Qdrant (default), FAISS, Chroma, Pinecone, Weaviate, and others
 
 ## License
 

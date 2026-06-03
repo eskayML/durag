@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "durag"
-version = "2.1.0"
+version = "2.1.1"
 description = "Du-RAG: Durable RAG — persistent memory for AI agents"
 authors = [
     { name = "Samuel Kalu", email = "kalusam619@gmail.com" }
