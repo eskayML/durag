@@ -578,7 +578,7 @@ class Memory(MemoryBase):
         agent_id: Optional[str] = None,
         run_id: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        infer: bool = True,
+        infer: bool = False,
         memory_type: Optional[str] = None,
         prompt: Optional[str] = None,
     ):
@@ -595,9 +595,10 @@ class Memory(MemoryBase):
             agent_id (str, optional): ID of the agent creating the memory. Defaults to None.
             run_id (str, optional): ID of the run creating the memory. Defaults to None.
             metadata (dict, optional): Metadata to store with the memory. Defaults to None.
-            infer (bool, optional): If True (default), an LLM is used to extract key facts from
+            infer (bool, optional): If True, an LLM is used to extract key facts from
                 'messages' and decide whether to add, update, or delete related memories.
-                If False, 'messages' are added as raw memories directly.
+                If False (default), 'messages' are stored as raw text immediately.
+                Use consolidate() later to batch-extract facts from stored memories.
             memory_type (str, optional): Specifies the type of memory. Currently, only
                 `MemoryType.PROCEDURAL.value` ("procedural_memory") is explicitly handled for
                 creating procedural memories (typically requires 'agent_id'). Otherwise, memories
@@ -658,6 +659,227 @@ class Memory(MemoryBase):
 
         vector_store_result = self._add_to_vector_store(messages, processed_metadata, effective_filters, infer, prompt=prompt)
         return {"results": vector_store_result}
+
+    def get_unconsolidated_count(
+        self,
+        *,
+        user_id: Optional[str] = None,
+        agent_id: Optional[str] = None,
+        run_id: Optional[str] = None,
+    ) -> int:
+        """Count how many memories have not been consolidated yet.
+
+        Args:
+            user_id (str, optional): Filter by user ID.
+            agent_id (str, optional): Filter by agent ID.
+            run_id (str, optional): Filter by run ID.
+
+        Returns:
+            int: Number of unconsolidated memories.
+        """
+        filters = {}
+        if user_id:
+            filters["user_id"] = user_id
+        if agent_id:
+            filters["agent_id"] = agent_id
+        if run_id:
+            filters["run_id"] = run_id
+
+        filters["consolidated"] = False
+        results = self.vector_store.list(filters=filters, top_k=10000)
+        return len(results[0] if isinstance(results, tuple) else results)
+
+    def consolidate(
+        self,
+        *,
+        user_id: Optional[str] = None,
+        agent_id: Optional[str] = None,
+        run_id: Optional[str] = None,
+        batch_size: int = 10,
+    ) -> dict:
+        """Batch-process unconsolidated memories through LLM extraction.
+
+        Finds all memories stored with infer=False that haven't been consolidated
+        yet, batches them, and extracts structured facts via the LLM. Raw memories
+        remain searchable during and after consolidation.
+
+        Args:
+            user_id (str, optional): Restrict to a specific user.
+            agent_id (str, optional): Restrict to a specific agent.
+            run_id (str, optional): Restrict to a specific run.
+            batch_size (int, optional): Memories per LLM call. Defaults to 10.
+
+        Returns:
+            dict: Summary with keys: processed, created, failed, remaining.
+        """
+        # Build filter scope
+        filters = {}
+        if user_id:
+            filters["user_id"] = user_id
+        if agent_id:
+            filters["agent_id"] = agent_id
+        if run_id:
+            filters["run_id"] = run_id
+
+        # Find unconsolidated memories
+        filters["consolidated"] = False if not filters else {"AND": [{"consolidated": False}]}
+        if not any(k in filters for k in ("user_id", "agent_id", "run_id")):
+            # No scope filter - just use consolidated filter
+            filters["consolidated"] = False
+
+        list_filters = {"consolidated": False}
+        if user_id:
+            list_filters["user_id"] = user_id
+        if agent_id:
+            list_filters["agent_id"] = agent_id
+        if run_id:
+            list_filters["run_id"] = run_id
+
+        raw_results = self.vector_store.list(filters=list_filters, top_k=10000)
+        # Normalize tuple return from Qdrant scroll
+        if isinstance(raw_results, tuple):
+            raw_results = raw_results[0]
+
+        if not raw_results:
+            return {"processed": 0, "created": 0, "failed": 0, "remaining": 0}
+
+        logger.info("Found %d unconsolidated memories", len(raw_results))
+
+        # Group into batches
+        batches = [raw_results[i:i + batch_size] for i in range(0, len(raw_results), batch_size)]
+        total_created = 0
+        total_failed = 0
+
+        for batch_idx, batch in enumerate(batches):
+            mem_texts = []
+            mem_ids = []
+            for mem in batch:
+                text = ""
+                if hasattr(mem, "payload") and mem.payload:
+                    text = mem.payload.get("data", "")
+                elif isinstance(mem, dict):
+                    text = mem.get("payload", {}).get("data", "") or mem.get("memory", "")
+                mem_texts.append(text)
+                mem_ids.append(mem.id if hasattr(mem, "id") else (mem.get("id") if isinstance(mem, dict) else None))
+
+            try:
+                # Build extraction prompt with all raw memories
+                combined_text = "\n\n".join(
+                    f"[Memory {i+1}]: {t}" for i, t in enumerate(mem_texts) if t
+                )
+
+                # Call LLM to extract structured facts
+                system_prompt = self.config.llm.consolidation_prompt if hasattr(self.config.llm, "consolidation_prompt") else (
+                    "You are an AI assistant that extracts key facts from raw memory texts. "
+                    "Given a batch of raw memories, extract the key information, merge duplicates, "
+                    "and output a list of clean, deduplicated facts as JSON."
+                )
+                user_prompt = (
+                    f"Extract key facts from these raw memories. Merge any duplicates or contradictions.\n\n"
+                    f"{combined_text}\n\n"
+                    f"Return JSON with format: {{\"memory\": [{{\"text\": \"fact 1\"}}, {{\"text\": \"fact 2\"}}]}}"
+                )
+
+                response = self.llm.generate_response(
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    response_format={"type": "json_object"},
+                )
+
+                # Parse response
+                response = response.strip()
+                if not response:
+                    logger.warning("Empty LLM response for consolidation batch %d", batch_idx)
+                    total_failed += len(batch)
+                    continue
+
+                try:
+                    extracted = json.loads(response).get("memory", [])
+                except json.JSONDecodeError:
+                    from durag.memory.utils import extract_json
+                    extracted_json = extract_json(response)
+                    extracted = json.loads(extracted_json).get("memory", [])
+
+                if not extracted:
+                    logger.info("No facts extracted from batch %d", batch_idx)
+                    # Still mark as consolidated so we don't retry empty batches
+                    self._mark_consolidated(mem_ids)
+                    continue
+
+                # Filter out empty texts
+                extracted_texts = [e.get("text", "").strip() for e in extracted if e.get("text", "").strip()]
+                if not extracted_texts:
+                    self._mark_consolidated(mem_ids)
+                    continue
+
+                # Embed and store extracted facts
+                try:
+                    mem_embeddings = self.embedding_model.embed_batch(extracted_texts, "add")
+                except Exception:
+                    mem_embeddings = [self.embedding_model.embed(t, "add") for t in extracted_texts]
+
+                for text, emb in zip(extracted_texts, mem_embeddings):
+                    metadata = {
+                        "data": text,
+                        "hash": hashlib.md5(text.encode()).hexdigest(),
+                        "consolidated": True,
+                        "created_at": datetime.now(timezone.utc).isoformat(),
+                        "updated_at": datetime.now(timezone.utc).isoformat(),
+                    }
+                    # Copy scope filters into metadata
+                    for key in ("user_id", "agent_id", "run_id"):
+                        if key in list_filters and list_filters[key]:
+                            metadata[key] = list_filters[key]
+
+                    memory_id = str(uuid.uuid4())
+                    self.vector_store.insert(
+                        vectors=[emb],
+                        ids=[memory_id],
+                        payloads=[metadata],
+                    )
+                    total_created += 1
+
+                # Mark originals as consolidated
+                self._mark_consolidated(mem_ids)
+
+            except Exception as e:
+                logger.error(f"Consolidation batch {batch_idx} failed: {e}")
+                total_failed += len(batch)
+
+        remaining = max(0, len(raw_results) - total_failed - total_created)
+        return {
+            "processed": len(raw_results),
+            "created": total_created,
+            "failed": total_failed,
+            "remaining": remaining,
+        }
+
+    def _mark_consolidated(self, memory_ids: list) -> None:
+        """Update memory payloads to mark them as consolidated."""
+        for mem_id in memory_ids:
+            if mem_id is None:
+                continue
+            try:
+                existing = self.vector_store.get(mem_id)
+                if existing is None:
+                    continue
+                payload = None
+                if hasattr(existing, "payload") and existing.payload:
+                    payload = existing.payload
+                elif isinstance(existing, dict):
+                    payload = existing.get("payload") or existing
+
+                if payload is None:
+                    continue
+
+                payload["consolidated"] = True
+                payload["updated_at"] = datetime.now(timezone.utc).isoformat()
+                self.vector_store.update(mem_id, payload=payload)
+            except Exception as e:
+                logger.debug("Failed to mark memory %s as consolidated: %s", mem_id, e)
+                pass
 
     def _add_to_vector_store(self, messages, metadata, filters, infer, prompt=None):
         if not infer:
@@ -2026,7 +2248,7 @@ class AsyncMemory(MemoryBase):
         agent_id: Optional[str] = None,
         run_id: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        infer: bool = True,
+        infer: bool = False,
         memory_type: Optional[str] = None,
         prompt: Optional[str] = None,
         llm=None,

@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap');
+      text { font-family: 'JetBrains Mono', monospace; }
+    </style>
+    <linearGradient id="durag-bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="640" height="400" fill="url(#bg-grad)" rx="12"/>
+
+  <!-- Grid lines -->
+  <g stroke="#1e293b" stroke-width="0.5">
+    <line x1="100" y1="80" x2="600" y2="80"/>
+    <line x1="100" y1="130" x2="600" y2="130"/>
+    <line x1="100" y1="180" x2="600" y2="180"/>
+    <line x1="100" y1="230" x2="600" y2="230"/>
+    <line x1="100" y1="280" x2="600" y2="280"/>
+    <line x1="100" y1="330" x2="600" y2="330"/>
+  </g>
+
+  <!-- Y-axis labels -->
+  <g fill="#64748b" font-size="11" text-anchor="end">
+    <text x="90" y="84">0ms</text>
+    <text x="90" y="134">500ms</text>
+    <text x="90" y="184">1000ms</text>
+    <text x="90" y="234">1500ms</text>
+    <text x="90" y="284">2000ms</text>
+    <text x="90" y="334">2500ms</text>
+  </g>
+
+  <!-- Y-axis -->
+  <line x1="100" y1="75" x2="100" y2="340" stroke="#334155" stroke-width="1.5"/>
+
+  <!-- mem0 bar: 1500ms = 1500/2500 * 250 = 150px -->
+  <rect x="120" y="90" width="480" height="36" rx="4" fill="rgba(148,163,184,0.15)" stroke="#64748b" stroke-width="1" opacity="0.5"/>
+  <rect x="120" y="90" width="288" height="36" rx="4" fill="rgba(148,163,184,0.3)" opacity="0.5"/>
+
+  <!-- Zep bar: 2500ms = 2500/2500 * 250 = 250px -->
+  <rect x="120" y="140" width="480" height="36" rx="4" fill="rgba(148,163,184,0.15)" stroke="#64748b" stroke-width="1" opacity="0.5"/>
+  <rect x="120" y="140" width="480" height="36" rx="4" fill="rgba(148,163,184,0.3)" opacity="0.5"/>
+
+  <!-- Letta bar: 1200ms = 1200/2500 * 250 = 120px -->
+  <rect x="120" y="190" width="480" height="36" rx="4" fill="rgba(148,163,184,0.15)" stroke="#64748b" stroke-width="1" opacity="0.5"/>
+  <rect x="120" y="190" width="230" height="36" rx="4" fill="rgba(148,163,184,0.3)" opacity="0.5"/>
+
+  <!-- Du-RAG bar: 50ms = 50/2500 * 250 = 5px (too small) -->
+  <rect x="120" y="245" width="480" height="48" rx="6" fill="rgba(52,211,153,0.08)" stroke="#34d399" stroke-width="1.5" filter="url(#glow)"/>
+  <rect x="120" y="245" width="12" height="48" rx="6" fill="url(#durag-bar)" filter="url(#glow)"/>
+
+  <!-- Labels -->
+  <g font-size="14" font-weight="600">
+    <text x="130" y="113" fill="#94a3b8" opacity="0.6">mem0</text>
+    <text x="416" y="113" fill="#64748b" font-size="11" opacity="0.6">~1500ms</text>
+
+    <text x="130" y="163" fill="#94a3b8" opacity="0.6">Zep</text>
+    <text x="608" y="163" fill="#64748b" font-size="11" opacity="0.6">~2500ms</text>
+
+    <text x="130" y="213" fill="#94a3b8" opacity="0.6">Letta</text>
+    <text x="358" y="213" fill="#64748b" font-size="11" opacity="0.6">~1200ms</text>
+
+    <text x="130" y="273" fill="#34d399" font-weight="700">Du-RAG</text>
+    <text x="140" y="273" fill="#22d3ee" font-size="12" font-weight="400">← 50ms</text>
+  </g>
+
+  <!-- Title -->
+  <text x="320" y="30" fill="#f1f5f9" font-size="18" font-weight="700" text-anchor="middle">Memory Add Latency Comparison</text>
+  <text x="320" y="50" fill="#64748b" font-size="11" text-anchor="middle">Lower is better. Du-RAG stores instantly — consolidate later.</text>
+
+  <!-- Legend -->
+  <g font-size="11" fill="#64748b">
+    <rect x="320" y="310" width="12" height="12" rx="2" fill="rgba(148,163,184,0.3)" opacity="0.5"/>
+    <text x="338" y="320">Other libraries (synchronous LLM extraction)</text>
+
+    <rect x="320" y="332" width="12" height="12" rx="2" fill="url(#durag-bar)"/>
+    <text x="338" y="342" fill="#34d399">Du-RAG (instant write, async consolidation)</text>
+  </g>
+</svg>

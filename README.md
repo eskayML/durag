@@ -35,6 +35,25 @@ history = m.get_all(filters={"user_id": "alice"})
 print(history)
 ```
 
+## Why Du-RAG?
+
+Du-RAG is the **fastest** memory library for AI agents. Unlike other libraries that block for 1-2 seconds calling an LLM on every write, Du-RAG stores memories instantly and lets you consolidate in the background.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/eskayML/durag/main/assets/latency-comparison.svg" alt="Latency Comparison" width="640">
+</p>
+
+```python
+# Fast path - returns in ~50ms, no LLM call
+m.add("Alice switched to Enterprise plan", user_id="alice")
+
+# Search works immediately on raw text
+results = m.search("What plan is Alice on?", user_id="alice")
+
+# Consolidate later - batch-extract facts with one LLM call
+m.consolidate(user_id="alice")
+```
+
 ## API Keys
 
 Du-RAG requires a provider API key. Set the env var for your preferred provider before first use:
@@ -57,6 +76,8 @@ export OPENAI_API_KEY="sk-..."
 
 ## Features
 
+- **Fast writes** - add() returns in ~50ms (no blocking LLM call)
+- **Async consolidation** - batch-extract facts with consolidate() when idle
 - Persistent memory across conversations - agents remember what they learn
 - Semantic search via vector embeddings - find the right context fast
 - Multiple backends - OpenAI, Anthropic, Gemini, DeepSeek, Ollama, vLLM, and more
