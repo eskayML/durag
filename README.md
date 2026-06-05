@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/eskayML/durag/main/assets/durag-banner.jpg" alt="Du-RAG" width="600">
+  <img src="https://raw.githubusercontent.com/eskayML/durag/main/assets/durag-banner.png" alt="Du-RAG" width="600">
 </p>
 
 <h1 align="center">Du-RAG</h1>
