@@ -40,7 +40,7 @@ print(history)
 Du-RAG is the **fastest** memory library for AI agents. Unlike other libraries that block for 1-2 seconds calling an LLM on every write, Du-RAG stores memories instantly and lets you consolidate in the background.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/eskayML/durag/main/assets/latency-comparison.svg" alt="Latency Comparison" width="640">
+  <img src="https://raw.githubusercontent.com/eskayML/durag/main/assets/latency-comparison.png" alt="Latency Comparison" width="640">
 </p>
 
 ```python
