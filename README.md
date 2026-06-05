@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">Du-RAG</h1>
-<p align="center"><b>Durable RAG</b> — a persistent memory layer for AI agents built on retrieval-augmented generation.</p>
+<p align="center"><b>Durable RAG</b> - a persistent memory layer for AI agents built on retrieval-augmented generation.</p>
 
 <p align="center">
   <a href="https://github.com/eskayML/durag/blob/main/LICENSE">
@@ -57,10 +57,10 @@ export OPENAI_API_KEY="sk-..."
 
 ## Features
 
-- Persistent memory across conversations — agents remember what they learn
-- Semantic search via vector embeddings — find the right context fast
-- Multiple backends — OpenAI, Anthropic, Gemini, DeepSeek, Ollama, vLLM, and more
-- Vector stores — Qdrant (default), FAISS, Chroma, Pinecone, Weaviate, and others
+- Persistent memory across conversations - agents remember what they learn
+- Semantic search via vector embeddings - find the right context fast
+- Multiple backends - OpenAI, Anthropic, Gemini, DeepSeek, Ollama, vLLM, and more
+- Vector stores - Qdrant (default), FAISS, Chroma, Pinecone, Weaviate, and others
 
 ## License
 
